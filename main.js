@@ -1,15 +1,31 @@
+var common = require("common");
+
 var roles = [
-	require("role.harvester")
+	require("role.harvester"),
+	require("role.worker"),
 ];
 
 var getRoleModule = function(name) {
-	for (var idx in roles) {
-		var role = roles[idx];
-		if (name == role.name) {
-			return role;
+	return common.getByName(roles, name);
+}
+
+var doSpawn = function(spawn, descs) {
+	for (var idx in descs) {
+		desc = descs[idx];
+		var role = desc[0];
+		if (common.refCount(role.name) < desc[1]) {
+			var name = role.name + Game.time;
+			if (spawn.spawnCreep(desc[2], name, {memory: {
+				role: role.name,
+			}}) == OK) {
+				console.log("Spawning new creep: " + name);
+				var creep = Game.creeps[name];
+				role.setup(creep);
+				common.ref(role.name);
+				return;
+			}
 		}
 	}
-	return undefined;
 }
 
 module.exports.loop = function () {
@@ -17,22 +33,17 @@ module.exports.loop = function () {
 		if (!Game.creeps[name]) {
 			var memory = Memory.creeps[name];
 			getRoleModule(memory.role).cleanup(memory);
+			common.deref(memory.role);
 			delete Memory.creeps[name];
 		}
 	}
 
 	var the_spawn = Game.spawns["Spawn1"];
 
-	if (_.filter(Game.creeps, (creep) => creep.memory.role == roles[0].name).length < 6) {
-		var name = "Harvester" + Game.time;
-		if (the_spawn.spawnCreep([WORK,CARRY,MOVE], name, {
-			memory: {role: roles[0].name},
-		}) == OK) {
-			console.log("Spawning new harvester: " + name);
-			var creep = Game.creeps[name];
-			getRoleModule(creep.memory.role).setup(creep.memory);
-		}
-	}
+	doSpawn(the_spawn, [
+		[roles[0], 3, [WORK, CARRY, MOVE]],
+		[roles[1], 1, [WORK, CARRY, MOVE]],
+	]);
 
 	if (the_spawn.spawning) {
 		var creep = Game.creeps[the_spawn.spawning.name];
@@ -45,6 +56,8 @@ module.exports.loop = function () {
 
 	for (var name in Game.creeps) {
 		var creep = Game.creeps[name];
+		if (getRoleModule(creep.memory.role) === undefined)
+			creep.suicide();
 		getRoleModule(creep.memory.role).run(creep);
 	}
 }

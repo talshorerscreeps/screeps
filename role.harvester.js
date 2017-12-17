@@ -1,21 +1,20 @@
 module.exports.name = "harvester";
 
+var common = require("common");
+
 var doUpgradeStep = function(creep) {
 	if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
 		creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#ffffff'}});
 	}
 }
 
-if (Memory.sourceHarvesterCount === undefined)
-	Memory.sourceHarvesterCount = {};
-
-module.exports.setup = function(memory) {
+module.exports.setup = function(creep) {
 	console.log("setup", module.exports.name);
 }
 
 var unrefSource = function(memory) {
 	if (memory.source != undefined) {
-		Memory.sourceHarvesterCount[memory.source]--;
+		common.deref(memory.source);
 		memory.source = undefined;
 	}
 }
@@ -37,12 +36,11 @@ module.exports.run = function (creep) {
 			var best = sources[0].id;
 			for (idx in sources) {
 				var id = sources[idx].id;
-				if (Memory.sourceHarvesterCount[id] === undefined)
-					Memory.sourceHarvesterCount[id] = 0;
-				if (Memory.sourceHarvesterCount[id] < Memory.sourceHarvesterCount[best])
+				if (common.refCount(id) < common.refCount(best))
 					best = id;
 			}
 			creep.memory.source = best;
+			common.ref(creep.memory.source);
 			Memory.sourceHarvesterCount[creep.memory.source]++;
 		}
 		var source = Game.getObjectById(creep.memory.source);
