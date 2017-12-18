@@ -52,6 +52,6 @@ module.exports.cleanup = function(memory) {
 }
 
 module.exports.run = function (creep) {
-	creep.say(creep.memory.state);
+	creep.say(creep.saying);
 	common.getByName(states, creep.memory.state).run(creep, done);
 }

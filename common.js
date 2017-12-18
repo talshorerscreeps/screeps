@@ -15,6 +15,7 @@ module.exports.creepInState = function(creep, state) {
 module.exports.creepEnterState = function(creep, state, done) {
 	console.log(creep.name, creep.memory.state, "->", state.name);
 	creep.memory.state = state.name;
+	creep.say(creep.memory.state);
 	state.setup(creep);
 	state.run(creep, done);
 }
