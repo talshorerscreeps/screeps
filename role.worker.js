@@ -14,34 +14,41 @@ var common = require("common");
 var stateSpawn = require("state.spawn");
 var stateHarvest = require("state.harvest");
 var stateUpgrade = require("state.upgrade");
+var stateCharge = require("state.charge");
 var stateIdle = require("state.idle");
 
 var states = [
 	stateSpawn,
 	stateHarvest,
 	stateUpgrade,
+	stateCharge,
 	stateIdle,
 ];
 
+var done = function(creep) {
+	common.getByName(states, creep.memory.state).cleanup(creep.memory);
+	if (common.creepInState(creep, stateSpawn)) {
+		common.creepEnterState(creep, stateHarvest, done);
+	} else if (common.creepInState(creep, stateHarvest)) {
+		common.creepEnterState(creep, stateCharge, done);
+	} else if (common.creepInState(creep, stateCharge)) {
+		if (creep.carry.energy > 0)
+			common.creepEnterState(creep, stateUpgrade, done);
+		else
+			common.creepEnterState(creep, stateHarvest, done);
+	} else if (common.creepInState(creep, stateUpgrade)) {
+		common.creepEnterState(creep, stateHarvest, done);
+	}
+}
+
 module.exports.setup = function(creep) {
 	console.log("setup", module.exports.name);
-	common.creepEnterState(creep, stateSpawn);
+	common.creepEnterState(creep, stateSpawn, done);
 }
 
 module.exports.cleanup = function(memory) {
 	console.log("cleanup", module.exports.name);
 	common.getByName(states, memory.state).cleanup(memory);
-}
-
-var done = function(creep) {
-	common.getByName(states, creep.memory.state).cleanup(creep.memory);
-	if (common.creepInState(creep, stateSpawn)) {
-		common.creepEnterState(creep, stateHarvest);
-	} else if (common.creepInState(creep, stateHarvest)) {
-		common.creepEnterState(creep, stateUpgrade);
-	} else if (common.creepInState(creep, stateUpgrade)) {
-		common.creepEnterState(creep, stateHarvest);
-	}
 }
 
 module.exports.run = function (creep) {

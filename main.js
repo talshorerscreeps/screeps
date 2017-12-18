@@ -1,7 +1,6 @@
 var common = require("common");
 
 var roles = [
-	require("role.harvester"),
 	require("role.worker"),
 ];
 
@@ -41,8 +40,7 @@ module.exports.loop = function () {
 	var the_spawn = Game.spawns["Spawn1"];
 
 	doSpawn(the_spawn, [
-		[roles[0], 3, [WORK, CARRY, MOVE]],
-		[roles[1], 1, [WORK, CARRY, MOVE]],
+		[roles[0], 4, [WORK, CARRY, MOVE]],
 	]);
 
 	if (the_spawn.spawning) {

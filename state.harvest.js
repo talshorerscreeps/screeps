@@ -16,15 +16,16 @@ module.exports.setup = function(creep) {
 
 module.exports.cleanup = function(memory) {
 	common.deref(memory.source);
+	memory.source = undefined;
 }
 
 module.exports.run = function(creep, done) {
 	var source = Game.getObjectById(creep.memory.source);
-	if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+	if (creep.carry.energy == creep.carryCapacity) {
+		done(creep);
+	} else if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
 		creep.moveTo(source, {
 			visualizePathStyle: {stroke: '#ffaa00'},
 		});
 	}
-	if (creep.carry.energy == creep.carryCapacity)
-		done(creep);
 }
