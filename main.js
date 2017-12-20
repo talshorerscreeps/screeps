@@ -2,6 +2,7 @@ var common = require("common");
 
 var roles = [
 	require("role.worker"),
+	require("role.upgrader"),
 ];
 
 var getRoleModule = function(name) {
@@ -41,6 +42,7 @@ module.exports.loop = function () {
 
 	doSpawn(the_spawn, [
 		[roles[0], 4, [WORK, CARRY, MOVE]],
+		[roles[1], 1, [WORK, CARRY, MOVE]],
 	]);
 
 	if (the_spawn.spawning) {
