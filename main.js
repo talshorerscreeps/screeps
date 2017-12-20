@@ -1,27 +1,24 @@
-var common = require("common");
+var ref = require("ref");
 
-var roles = [
-	require("role.worker"),
-	require("role.upgrader"),
-];
+var stateSpawn = require("state.spawn");
 
-var getRoleModule = function(name) {
-	return common.getByName(roles, name);
+var getStateModule = function(memory) {
+	return require("state." + memory.state);
 }
 
 var doSpawn = function(spawn, descs) {
 	for (var idx in descs) {
 		desc = descs[idx];
 		var role = desc[0];
-		if (common.refCount(role.name) < desc[1]) {
-			var name = role.name + Game.time;
+		if (ref.count(role) < desc[1]) {
+			var name = role + Game.time;
 			if (spawn.spawnCreep(desc[2], name, {memory: {
-				role: role.name,
+				role: role,
 			}}) == OK) {
 				console.log("Spawning new creep: " + name);
 				var creep = Game.creeps[name];
-				role.setup(creep);
-				common.ref(role.name);
+				creep.memory.state = "spawn";
+				ref.get(role);
 				return;
 			}
 		}
@@ -32,8 +29,8 @@ module.exports.loop = function () {
 	for (var name in Memory.creeps) {
 		if (!Game.creeps[name]) {
 			var memory = Memory.creeps[name];
-			getRoleModule(memory.role).cleanup(memory);
-			common.deref(memory.role);
+			getStateModule(memory).cleanup(memory);
+			ref.put(memory.role);
 			delete Memory.creeps[name];
 		}
 	}
@@ -41,8 +38,8 @@ module.exports.loop = function () {
 	var the_spawn = Game.spawns["Spawn1"];
 
 	doSpawn(the_spawn, [
-		[roles[0], 4, [WORK, CARRY, MOVE]],
-		[roles[1], 1, [WORK, CARRY, MOVE]],
+		["worker", 4, [WORK, CARRY, MOVE]],
+		["upgrader", 1, [WORK, CARRY, MOVE]],
 	]);
 
 	if (the_spawn.spawning) {
@@ -56,8 +53,15 @@ module.exports.loop = function () {
 
 	for (var name in Game.creeps) {
 		var creep = Game.creeps[name];
-		if (getRoleModule(creep.memory.role) === undefined)
-			creep.suicide();
-		getRoleModule(creep.memory.role).run(creep);
+		if (getStateModule(creep.memory).run(creep)) {
+			getStateModule(creep.memory).cleanup(creep.memory);
+			while (true) {
+				creep.memory.state = require(
+					"role." + creep.memory.role).next(creep);
+				if (!getStateModule(creep.memory).setup(creep))
+					break;
+			}
+		}
+		creep.say(creep.memory.state);
 	}
 }
