@@ -1,11 +1,6 @@
 module.exports.build = function(energyCapacityAvailable) {
-	var parts = [MOVE, CARRY, WORK];
-	var mult = Math.floor(energyCapacityAvailable /
-		require("common").totalCost(parts));
-	var ret = [];
-	for (var i = 0; i < mult; i++)
-		ret = ret.concat(parts);
-	return ret;
+	return require("common").largeBody(
+		[MOVE, CARRY, WORK], energyCapacityAvailable);
 }
 
 module.exports.next = function(creep) {
