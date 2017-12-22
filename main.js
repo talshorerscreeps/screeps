@@ -58,8 +58,11 @@ module.exports.loop = function () {
 			while (true) {
 				creep.memory.state = require(
 					"role." + creep.memory.role).next(creep);
-				if (!getStateModule(creep.memory).setup(creep))
+				var stateModule = getStateModule(creep.memory);
+				if (!stateModule.setup(creep)) {
+					stateModule.run(creep);
 					break;
+				}
 			}
 		}
 		creep.say(creep.memory.state);
