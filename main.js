@@ -6,6 +6,10 @@ var getStateModule = function(memory) {
 	return require("state." + memory.state);
 }
 
+var getRoleModule = function(role) {
+	return require("role." + role);
+}
+
 var doSpawn = function(spawn, descs, prefix) {
 	if (spawn.spawning) {
 		var creep = Game.creeps[spawn.spawning.name];
@@ -22,15 +26,63 @@ var doSpawn = function(spawn, descs, prefix) {
 		var refName = prefix + role;
 		if (ref.count(refName) < desc[1]) {
 			var name = spawn.name + "_" + role + "_" + Game.time;
-			if (spawn.spawnCreep(desc[2], name, {memory: {
-				role: role,
-				state: "spawn",
-				refPrefix: prefix,
-			}}) == OK) {
+			if (spawn.spawnCreep(
+				getRoleModule(role).build(
+					spawn.room.energyCapacityAvailable),
+				name, {memory: {
+					role: role,
+					state: "spawn",
+					refPrefix: prefix,
+				}
+			}) == OK) {
 				console.log("Spawning new creep: " + name);
 				ref.get(refName);
 				return;
 			}
+		}
+	}
+}
+
+var tryPlaceExtension = function(room, center, x, y) {
+	const roomLimits = 50;
+	const buffer = 4;
+	x = center.x + x * 2;
+	if (x < buffer || x >= roomLimits - buffer)
+		return;
+	y = center.y + y * 2;
+	if (y < buffer || y >= roomLimits - buffer)
+		return;
+	var look = room.lookAt(x, y);
+	if (look.length > 1)
+		return;
+	if (look[0].terrain == "plain" || look[0].terrain == "swamp")
+		return {x: x, y: y}
+}
+
+var findPlaceForExtension = function(room, center) {
+	for (m = 1; m <= 3; m++) { /* set the limit to 3 for now */
+		var x, y;
+		y = -m;
+		x = -m;
+		for (; x < m; x++) {
+			var pos = tryPlaceExtension(room, center, x, y);
+			if (pos)
+				return pos;
+		}
+		for (; y < m; y++) {
+			var pos = tryPlaceExtension(room, center, x, y);
+			if (pos)
+				return pos;
+		}
+		for (; x > -m; x--) {
+			var pos = tryPlaceExtension(room, center, x, y);
+			if (pos)
+				return pos;
+		}
+		for (; y > -m; y--) {
+			var pos = tryPlaceExtension(room, center, x, y);
+			if (pos)
+				return pos;
 		}
 	}
 }
@@ -40,16 +92,33 @@ var doRoom = function(room) {
 	var the_spawn = spawns[0];
 
 	doSpawn(the_spawn, [
-		["worker", 4, [WORK, CARRY, MOVE]],
-		["upgrader", 1, [WORK, CARRY, MOVE]],
+		["worker", 4],
+		["upgrader", 1],
 	], room.name);
+
+	if (room.memory.extensionsChecked < room.controller.level) {
+		var extensions = room.find(FIND_MY_STRUCTURES, {
+			filter: {structureType: STRUCTURE_EXTENSION},
+		});
+		if (extensions.length == CONTROLLER_STRUCTURES[
+				STRUCTURE_EXTENSION][room.controller.level]) {
+			room.memory.extensionsChecked = room.controller.level;
+		} else {
+			var pos = findPlaceForExtension(room, the_spawn.pos);
+			if (pos && room.createConstructionSite(pos.x, pos.y,
+					STRUCTURE_EXTENSION) ==
+					ERR_RCL_NOT_ENOUGH) {
+				room.memory.extensionsChecked = room.controller.level;
+			}
+		}
+	}
 
 	for (var creep of room.find(FIND_MY_CREEPS)) {
 		if (getStateModule(creep.memory).run(creep)) {
 			getStateModule(creep.memory).cleanup(creep.memory);
 			while (true) {
-				creep.memory.state = require(
-					"role." + creep.memory.role).next(creep);
+				creep.memory.state = getRoleModule(
+					creep.memory.role).next(creep);
 				var stateModule = getStateModule(creep.memory);
 				if (!stateModule.setup(creep)) {
 					stateModule.run(creep);
@@ -77,7 +146,9 @@ module.exports.loop = function () {
 			the_room = Game.spawns[name].room;
 			break;
 		}
-		the_room.memory = {};
+		the_room.memory = {
+			extensionsChecked: 1,
+		};
 	}
 
 	for (var name in Memory.rooms) {

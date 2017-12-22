@@ -21,13 +21,12 @@ module.exports.run = function(creep) {
 	if (creep.carry.energy == 0) {
 		return true;
 	} else {
-		target = Game.getObjectById(creep.memory.target);
-		if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+		var target = Game.getObjectById(creep.memory.target);
+		if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
 			creep.moveTo(target, {
 				visualizePathStyle: {stroke: '#ffffff'},
 			});
-		} else {
-			return true;
-		}
+		else
+			return this.setup(creep);
 	}
 }

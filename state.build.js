@@ -1,9 +1,9 @@
 module.exports.setup = function(creep) {
-	var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
-	if (targets.length > 0)
-		creep.memory.target = targets[0].id;
-	else
+	var target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
+	if (target === null)
 		return true;
+	else
+		creep.memory.target = target.id;
 }
 
 module.exports.cleanup = function(memory) {
