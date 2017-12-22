@@ -22,11 +22,11 @@ module.exports.run = function(creep) {
 		return true;
 	} else {
 		var target = Game.getObjectById(creep.memory.target);
+		if (target.energy == target.energyCapacity)
+			return this.setup(creep);
 		if (creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
 			creep.moveTo(target, {
 				visualizePathStyle: {stroke: '#ffffff'},
 			});
-		else
-			return this.setup(creep);
 	}
 }
