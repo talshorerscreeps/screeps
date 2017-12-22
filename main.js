@@ -53,7 +53,8 @@ var tryPlaceExtension = function(room, center, x, y) {
 	if (y < buffer || y >= roomLimits - buffer)
 		return;
 	var look = room.lookAt(x, y);
-	if (look.length > 1)
+	if (look.length > 1 || room.lookForAtArea(LOOK_SOURCES, y - 1, x - 1,
+			y + 1, x + 1, true).length != 0)
 		return;
 	if (look[0].terrain == "plain" || look[0].terrain == "swamp")
 		return {x: x, y: y}
