@@ -5,5 +5,5 @@ module.exports.cleanup = function(memory) {
 }
 
 module.exports.run = function(creep) {
-	return !creep.spawning;
+  return !creep.spawning;
 }
