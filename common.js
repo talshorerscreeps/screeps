@@ -3,8 +3,7 @@ module.exports.totalCost = function(parts) {
 }
 
 module.exports.largeBody = function(parts, energyCapacityAvailable, limit) {
-	var mult = Math.floor(energyCapacityAvailable /
-		require("common").totalCost(parts));
+	var mult = Math.floor(energyCapacityAvailable / this.totalCost(parts));
 	var ret = [];
 	if (limit && mult > limit)
 		mult = limit;
