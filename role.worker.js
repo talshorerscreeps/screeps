@@ -1,6 +1,6 @@
 module.exports.build = function(energyCapacityAvailable) {
 	return require("common").largeBody(
-		[MOVE, CARRY, WORK], energyCapacityAvailable);
+		[MOVE, CARRY, WORK], energyCapacityAvailable, 6);
 }
 
 module.exports.next = function(creep) {
