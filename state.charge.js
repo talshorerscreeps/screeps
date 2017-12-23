@@ -1,16 +1,15 @@
 module.exports.setup = function(creep) {
-	var targets = creep.room.find(FIND_STRUCTURES, {
-		filter: (structure) => {
-			return structure.energy < structure.energyCapacity &&
-				(structure.structureType == STRUCTURE_EXTENSION ||
-				structure.structureType == STRUCTURE_SPAWN ||
-				structure.structureType == STRUCTURE_TOWER);
-		}
-	});
-	if (targets.length > 0)
-		creep.memory.target = targets[0].id;
-	else
+	var target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+		filter: (structure) => (
+			structure.energy < structure.energyCapacity &&
+			(structure.structureType == STRUCTURE_EXTENSION ||
+			structure.structureType == STRUCTURE_SPAWN ||
+			structure.structureType == STRUCTURE_TOWER)
+	)});
+	if (target === null)
 		return true;
+	else
+		creep.memory.target = target.id;
 }
 
 module.exports.cleanup = function(memory) {
