@@ -1,7 +1,4 @@
-module.exports = function() {
-}
-
-module.exports.prototype.setup = function(creep) {
+module.exports.setup = function(creep) {
   var target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
     filter: this.filter,
   });
@@ -11,11 +8,11 @@ module.exports.prototype.setup = function(creep) {
     creep.memory.target = target.id;
 }
 
-module.exports.prototype.cleanup = function(memory) {
+module.exports.cleanup = function(memory) {
   memory.target = undefined;
 }
 
-module.exports.prototype.run = function(creep) {
+module.exports.run = function(creep) {
   if (this.stopCondition(creep)) {
     return true;
   } else {
