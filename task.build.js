@@ -1,27 +1,19 @@
+module.exports = _.clone(require("base.task.moveAct"));
+
 module.exports.setup = function(creep) {
-  var target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
-  if (target === null)
+  var target = creep.room.memory.buildQueue[0];
+  if (target === undefined) {
     return true;
-  else
-    creep.memory.target = target.id;
-}
-
-module.exports.cleanup = function(memory) {
-  memory.target = undefined;
-}
-
-module.exports.run = function(creep) {
-  if (creep.carry.energy == 0) {
+  } else if (Game.getObjectById(target) === null) {
+    creep.room.memory.buildQueue = creep.room.memory.buildQueue.splice(1);
     return true;
   } else {
-    target = Game.getObjectById(creep.memory.target);
-    var err = creep.build(target);
-    if (err == ERR_NOT_IN_RANGE) {
-      creep.moveTo(target, {
-        visualizePathStyle: {stroke: '#ffffff'},
-      });
-    } else if (err == ERR_INVALID_TARGET) {
-      return true;
-    }
+    creep.memory.target = target;
   }
 }
+
+module.exports.resetCondition = target => target === null;
+
+module.exports.stopCondition = creep => creep.carry.energy == 0;
+
+module.exports.action = "build";

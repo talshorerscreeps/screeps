@@ -107,6 +107,9 @@ var doRoom = function(room) {
       if (pos && room.createConstructionSite(pos.x, pos.y,
           STRUCTURE_EXTENSION) ==
           ERR_RCL_NOT_ENOUGH) {
+        room.find(FIND_CONSTRUCTION_SITES, {
+          filter: site => site.structureType == STRUCTURE_EXTENSION,
+        }).forEach(site => room.memory.buildQueue.push(site.id));
         room.memory.extensionsChecked = room.controller.level;
       }
     }
@@ -147,6 +150,7 @@ module.exports.loop = function () {
     }
     the_room.memory = {
       extensionsChecked: 1,
+      buildQueue: [],
     };
   }
 
