@@ -6,7 +6,7 @@ module.exports.setup = function(creep) {
     return true;
   } else if (Game.getObjectById(target) === null) {
     creep.room.memory.buildQueue = creep.room.memory.buildQueue.splice(1);
-    return true;
+    return this.setup(creep);
   } else {
     creep.memory.target = target;
   }
