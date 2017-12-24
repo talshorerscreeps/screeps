@@ -6,10 +6,10 @@ module.exports.build = function(energyCapacityAvailable) {
 module.exports.next = function(creep) {
   if (creep.carry.energy == 0)
     return "harvest";
-  else if (creep.memory.state == "harvest")
+  else if (creep.memory.task == "harvest")
     return "deposit";
-  else if (creep.memory.state == "deposit")
+  else if (creep.memory.task == "deposit")
     return "build";
-  else if (creep.memory.state == "build")
+  else if (creep.memory.task == "build")
     return "upgrade";
 }

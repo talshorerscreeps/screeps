@@ -1,4 +1,4 @@
-module.exports = new (require("state.base.energyTransfer"))();
+module.exports = new (require("task.base.energyTransfer"))();
 
 var resetCondition = target => target.energy == 0;
 

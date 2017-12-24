@@ -6,7 +6,7 @@ module.exports.build = function(energyCapacityAvailable) {
 module.exports.next = function(creep) {
   if (creep.carry.energy != 0)
     return "upgrade";
-  else if (creep.memory.state == "withdraw")
+  else if (creep.memory.task == "withdraw")
     return "idle";
   else
     return "withdraw";

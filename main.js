@@ -1,9 +1,7 @@
 var ref = require("ref");
 
-var stateSpawn = require("state.spawn");
-
-var getStateModule = function(memory) {
-  return require("state." + memory.state);
+var getTaskModule = function(memory) {
+  return require("task." + memory.task);
 }
 
 var getRoleModule = function(role) {
@@ -31,7 +29,7 @@ var doSpawn = function(spawn, descs, prefix) {
           spawn.room.energyCapacityAvailable),
         name, {memory: {
           role: role,
-          state: "spawn",
+          task: "spawn",
           refPrefix: prefix,
         }
       }) == OK) {
@@ -115,19 +113,19 @@ var doRoom = function(room) {
   }
 
   for (var creep of room.find(FIND_MY_CREEPS)) {
-    if (getStateModule(creep.memory).run(creep)) {
-      getStateModule(creep.memory).cleanup(creep.memory);
+    if (getTaskModule(creep.memory).run(creep)) {
+      getTaskModule(creep.memory).cleanup(creep.memory);
       while (true) {
-        creep.memory.state = getRoleModule(
+        creep.memory.task = getRoleModule(
           creep.memory.role).next(creep);
-        var stateModule = getStateModule(creep.memory);
-        if (!stateModule.setup(creep)) {
-          stateModule.run(creep);
+        var taskModule = getTaskModule(creep.memory);
+        if (!taskModule.setup(creep)) {
+          taskModule.run(creep);
           break;
         }
       }
     }
-    creep.say(creep.memory.state);
+    creep.say(creep.memory.task);
   }
 }
 
@@ -135,7 +133,7 @@ module.exports.loop = function () {
   for (var name in Memory.creeps) {
     if (!Game.creeps[name]) {
       var memory = Memory.creeps[name];
-      getStateModule(memory).cleanup(memory);
+      getTaskModule(memory).cleanup(memory);
       ref.put(memory.refPrefix + memory.role);
       delete Memory.creeps[name];
     }
