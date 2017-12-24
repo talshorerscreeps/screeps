@@ -93,7 +93,7 @@ var doRoom = function(room) {
   var the_spawn = spawns[0];
 
   doSpawn(the_spawn, [
-    ["worker", 4],
+    ["worker", 6],
     ["upgrader", 1],
   ], room.name);
 
