@@ -2,8 +2,9 @@ module.exports.totalCost = function(parts) {
   return _.reduce(_.map(parts, a => BODYPART_COST[a]), (a, b) => (a + b));
 }
 
-module.exports.largeBody = function(parts, energyCapacityAvailable, limit) {
-  var mult = Math.floor(energyCapacityAvailable / this.totalCost(parts));
+module.exports.largeBody = function(parts, spawnQueue, limit) {
+  var mult = Math.floor(Game.rooms[spawnQueue.room].energyCapacityAvailable /
+    this.totalCost(parts));
   var ret = [];
   if (limit && mult > limit)
     mult = limit;

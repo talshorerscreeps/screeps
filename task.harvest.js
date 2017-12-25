@@ -1,4 +1,4 @@
-var ref = require("ref");
+var ref = require("lib.ref");
 
 module.exports.setup = function(creep) {
   var sources = creep.room.find(FIND_SOURCES);

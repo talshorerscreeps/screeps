@@ -1,11 +1,12 @@
 module.exports = _.clone(require("base.task.moveAct"));
 
 module.exports.setup = function(creep) {
-  var target = creep.room.memory.buildQueue[0];
+  var queue = Memory[Memory[creep.memory.unit].buildQueue].queue
+  var target = queue[0];
   if (target === undefined) {
     return true;
   } else if (Game.getObjectById(target) === null) {
-    creep.room.memory.buildQueue = creep.room.memory.buildQueue.splice(1);
+    queue.shift();
     return this.setup(creep);
   } else {
     creep.memory.target = target;
