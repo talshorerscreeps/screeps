@@ -1,13 +1,11 @@
+module.exports = _.clone(require("base.task.moveAct"));
+
 module.exports.setup = function(creep) {
+  creep.memory.target = creep.room.controller.id;
 }
 
-module.exports.cleanup = function(memory) {
-}
+module.exports.resetCondition = target => false;
 
-module.exports.run = function(creep) {
-  if (creep.carry.energy == 0) {
-    return true;
-  } else if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-    creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#ffffff'}});
-  }
-}
+module.exports.stopCondition = creep => creep.carry.energy == 0;
+
+module.exports.action = "upgradeController";
