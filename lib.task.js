@@ -5,6 +5,8 @@ var getTaskModule = function(memory) {
 module.exports.runCreep = function(unit, name) {
   creep = Game.creeps[name];
   if (creep === undefined) {
+    var memory = Memory.creeps[name];
+    getTaskModule(memory).cleanup(memory);
     Units[unit].creepDied(unit, name);
     delete Memory.creeps[name];
     return;
