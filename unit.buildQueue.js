@@ -1,5 +1,5 @@
-module.exports.setup = function(id, room) {
-  Memory[id] = {
+module.exports.setup = function(unit, room) {
+  Memory[unit] = {
     queue: [],
     room: room.name,
     extensionsChecked: 0,
@@ -52,8 +52,8 @@ var findPlaceForExtension = function(room, center) {
   }
 }
 
-module.exports.run = function(id) {
-  var memory = Memory[id];
+module.exports.run = function(unit) {
+  var memory = Memory[unit];
   var room = Game.rooms[memory.room];
   if (memory.extensionsChecked == room.controller.level)
     return;

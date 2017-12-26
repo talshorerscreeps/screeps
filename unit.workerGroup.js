@@ -1,7 +1,7 @@
 var baseBody = [MOVE, CARRY, WORK];
 
-module.exports.setup = function(id, spawnQueue, buildQueue) {
-  Memory[id] = {
+module.exports.setup = function(unit, spawnQueue, buildQueue) {
+  Memory[unit] = {
     creeps: [],
     spawnQueue: spawnQueue,
     buildQueue: buildQueue,
@@ -10,29 +10,29 @@ module.exports.setup = function(id, spawnQueue, buildQueue) {
   for (var i = 0; i < 6; i++)
     Memory[spawnQueue].queue.push({
       body: baseBody,
-      unit: id,
+      unit: unit,
     });
 }
 
-module.exports.creepSpawning = function(id, creepName) {
-  Memory[id].creeps.push(creepName);
+module.exports.creepSpawning = function(unit, creepName) {
+  Memory[unit].creeps.push(creepName);
 }
 
-module.exports.creepDied = function(id, creepName) {
-  var memory = Memory[id];
+module.exports.creepDied = function(unit, creepName) {
+  var memory = Memory[unit];
   _.pull(memory.creeps, creepName);
   var spawnQueue = Memory[memory.spawnQueue];
   spawnQueue.queue.unshift({
-    unit: id,
     body: require("lib.body").largeBody(baseBody, spawnQueue, 6),
+    unit: unit,
   });
 }
 
-module.exports.run = function(id) {
-  require("lib.task").runCreeps(id, Memory[id].creeps);
+module.exports.run = function(unit) {
+  require("lib.task").runCreeps(unit, Memory[unit].creeps);
 }
 
-module.exports.getNextTask = function(id, creep) {
+module.exports.getNextTask = function(unit, creep) {
   if (creep.carry.energy == 0)
     return "harvest";
   else if (creep.memory.task == "harvest")

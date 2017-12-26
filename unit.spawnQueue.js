@@ -1,5 +1,5 @@
-module.exports.setup = function(id, room) {
-  Memory[id] = {
+module.exports.setup = function(unit, room) {
+  Memory[unit] = {
     queue: [],
     spawns: _.map(room.find(FIND_MY_SPAWNS), spawn => spawn.id),
     room: room.name,
@@ -7,11 +7,11 @@ module.exports.setup = function(id, room) {
   };
 }
 
-module.exports.run = function(id) {
-  var queue = Memory[id].queue;
+module.exports.run = function(unit) {
+  var queue = Memory[unit].queue;
   if (queue.length == 0)
     return;
-  for (var spawn of Memory[id].spawns) {
+  for (var spawn of Memory[unit].spawns) {
     if (spawn.spawning)
       continue;
     var name = require("lib.uuid")();
