@@ -16,7 +16,7 @@ var tryPlaceExtension = function(room, center, x, y) {
   y = center.y + y * 2;
   if (y < buffer || y >= roomLimits - buffer)
     return;
-  var look = room.lookAt(x, y);
+  var look = room.lookAt(x, y); // FIXME use getTerrainAt
   if (look.length > 1 || room.lookForAtArea(LOOK_SOURCES, y - 1, x - 1,
       y + 1, x + 1, true).length != 0)
     return;
@@ -57,21 +57,13 @@ module.exports.run = function(unit) {
   var room = Game.rooms[memory.room];
   if (memory.extensionsChecked == room.controller.level)
     return;
-  var extensions = room.find(FIND_MY_STRUCTURES, {
-    filter: {structureType: STRUCTURE_EXTENSION},
-  });
-  if (extensions.length == CONTROLLER_STRUCTURES[
-      STRUCTURE_EXTENSION][room.controller.level]) {
+  var pos = findPlaceForExtension(room, room.find(FIND_MY_SPAWNS)[0].pos);
+  if (pos && room.createConstructionSite(pos.x, pos.y,
+      STRUCTURE_EXTENSION) ==
+      ERR_RCL_NOT_ENOUGH) {
+    room.find(FIND_CONSTRUCTION_SITES, {
+      filter: site => site.structureType == STRUCTURE_EXTENSION,
+    }).forEach(site => memory.queue.push(site.id));
     memory.extensionsChecked = room.controller.level;
-  } else {
-    var pos = findPlaceForExtension(room, room.find(FIND_MY_SPAWNS)[0].pos);
-    if (pos && room.createConstructionSite(pos.x, pos.y,
-        STRUCTURE_EXTENSION) ==
-        ERR_RCL_NOT_ENOUGH) {
-      room.find(FIND_CONSTRUCTION_SITES, {
-        filter: site => site.structureType == STRUCTURE_EXTENSION,
-      }).forEach(site => memory.queue.push(site.id));
-      memory.extensionsChecked = room.controller.level;
-    }
   }
 }
