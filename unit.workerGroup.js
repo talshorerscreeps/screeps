@@ -23,8 +23,9 @@ module.exports.creepDied = function(unit, creepName) {
   _.pull(memory.creeps, creepName);
   var spawnQueue = Memory[memory.spawnQueue];
   spawnQueue.queue.unshift({
-    body: require("lib.body").largeBody(baseBody, spawnQueue, 6),
     unit: unit,
+    body: require("lib.body").largeBody(baseBody, spawnQueue,
+      memory.creeps.length ? 6 : 1),
   });
 }
 
