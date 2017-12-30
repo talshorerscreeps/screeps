@@ -10,45 +10,38 @@ module.exports.setup = function(unit, room) {
 var tryPlaceExtension = function(room, center, x, y) {
   const roomLimits = 50;
   const buffer = 4;
-  x = center.x + x * 2;
+  x = center.x + x;
   if (x < buffer || x >= roomLimits - buffer)
     return;
-  y = center.y + y * 2;
+  y = center.y + y;
   if (y < buffer || y >= roomLimits - buffer)
     return;
-  var look = room.lookAt(x, y); // FIXME use getTerrainAt
-  if (look.length > 1 || room.lookForAtArea(LOOK_SOURCES, y - 1, x - 1,
-      y + 1, x + 1, true).length != 0)
+  if (room.lookForAtArea(
+        LOOK_SOURCES, y - 1, x - 1, y + 1, x + 1, true).length != 0)
     return;
-  if (look[0].terrain == "plain" || look[0].terrain == "swamp")
-    return {x: x, y: y}
+  if (room.createConstructionSite(x, y, STRUCTURE_EXTENSION) ==
+      ERR_RCL_NOT_ENOUGH)
+    return true;
 }
 
-var findPlaceForExtension = function(room, center) {
-  for (m = 1; m <= 3; m++) { /* set the limit to 3 for now */
-    var x, y;
+var placeExtensions = function(room) {
+  var x, y;
+  var center = room.find(FIND_MY_SPAWNS)[0].pos;
+  for (m = 1; m <= 5; m++) { /* set the limit to 3 for now */
     y = -m;
-    x = -m;
-    for (; x < m; x++) {
-      var pos = tryPlaceExtension(room, center, x, y);
-      if (pos)
-        return pos;
-    }
+    for (x = -m; x <= m; x += 2)
+      if (tryPlaceExtension(room, center, x, y))
+        return;
     for (; y < m; y++) {
-      var pos = tryPlaceExtension(room, center, x, y);
-      if (pos)
-        return pos;
+      x = m * 2 - Math.abs(y)
+      if (tryPlaceExtension(room, center, -x, y))
+        return;
+      if (tryPlaceExtension(room, center, x, y))
+        return;
     }
-    for (; x > -m; x--) {
-      var pos = tryPlaceExtension(room, center, x, y);
-      if (pos)
-        return pos;
-    }
-    for (; y > -m; y--) {
-      var pos = tryPlaceExtension(room, center, x, y);
-      if (pos)
-        return pos;
-    }
+    for (x = -m; x <= m; x += 2)
+      if (tryPlaceExtension(room, center, x, y))
+        return;
   }
 }
 
@@ -57,13 +50,13 @@ module.exports.run = function(unit) {
   var room = Game.rooms[memory.room];
   if (memory.extensionsChecked == room.controller.level)
     return;
-  var pos = findPlaceForExtension(room, room.find(FIND_MY_SPAWNS)[0].pos);
-  if (pos && room.createConstructionSite(pos.x, pos.y,
-      STRUCTURE_EXTENSION) ==
-      ERR_RCL_NOT_ENOUGH) {
+  if (memory.extensionsChecked == -1) {
     room.find(FIND_CONSTRUCTION_SITES, {
       filter: site => site.structureType == STRUCTURE_EXTENSION,
     }).forEach(site => memory.queue.push(site.id));
     memory.extensionsChecked = room.controller.level;
+  } else {
+    placeExtensions(room);
+    memory.extensionsChecked = -1;
   }
 }
