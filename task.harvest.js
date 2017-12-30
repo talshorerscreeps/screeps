@@ -2,12 +2,8 @@ var ref = require("lib.ref");
 
 module.exports = _.clone(require("base.task.moveAct"));
 
-var resetCondition = target => target.energy == 0;
-
 module.exports.setup = function(creep) {
-  var targets = creep.room.find(FIND_SOURCES, {
-    filter: target => !resetCondition(target),
-  });
+  var targets = creep.room.find(FIND_SOURCES_ACTIVE);
   if (targets.length == 0)
     return true;
   var best = targets[0].id;
@@ -27,7 +23,7 @@ module.exports.cleanup = function(memory) {
   baseCleanup(memory);
 }
 
-module.exports.resetCondition = resetCondition;
+module.exports.resetCondition = target => target.energy == 0;
 
 module.exports.stopCondition = creep => (
   creep.carry.energy == creep.carryCapacity);
