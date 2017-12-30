@@ -1,9 +1,10 @@
 var baseBody = [MOVE, CARRY, WORK];
 
-module.exports.setup = function(unit, spawnQueue) {
+module.exports.setup = function(unit, spawnQueue, buildQueue) {
   Memory[unit] = {
     creeps: [],
     spawnQueue: spawnQueue,
+    buildQueue: buildQueue,
     module: "upgrader",
     ncreeps: 1,
   };
@@ -38,7 +39,8 @@ module.exports.run = function(unit) {
   require("lib.task").runCreeps(unit, Memory[unit].creeps);
   var room = Game.rooms[Memory[Memory[unit].spawnQueue].room];
   if (room.energyCapacityAvailable == room.energyAvailable &&
-      Memory[unit].ncreeps < 4) /* too many upgraders will starve everything */
+      Memory[unit].ncreeps < 8 && /* avoid starving everything */
+      Memory[Memory[unit].buildQueue].queue.length == 0)
     spawnCreep(unit);
 }
 
