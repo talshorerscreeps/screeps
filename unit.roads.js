@@ -3,19 +3,19 @@ var baseBody = [MOVE, CARRY, WORK];
 module.exports.setup = function(unit, spawnQueue, buildQueue) {
   Memory[unit] = {
     creep: null,
-    pendingPush: true,
-    firstRun: true,
+    pendingPush: 0,
     spawnQueue: spawnQueue,
     buildQueue: buildQueue,
+    paths: [],
     module: "roads",
   };
   var room = Game.rooms[Memory[buildQueue].room];
   var theSpawn = room.find(FIND_MY_SPAWNS)[0];
-  var paths = [theSpawn.pos.findPathTo(room.controller)];
+  Memory[unit].paths = [Room.serializePath(theSpawn.pos.findPathTo(
+    room.controller))];
   room.find(FIND_SOURCES).forEach(
-    source => paths.push(theSpawn.pos.findPathTo(source)));
-  paths.forEach(path => path.forEach(
-    tile => room.createConstructionSite(tile.x, tile.y, STRUCTURE_ROAD)));
+    source => Memory[unit].paths.push(Room.serializePath(
+      theSpawn.pos.findPathTo(source))));
   Memory[spawnQueue].queue.push({
     body: baseBody,
     unit: unit,
@@ -24,6 +24,10 @@ module.exports.setup = function(unit, spawnQueue, buildQueue) {
 
 module.exports.creepSpawning = function(unit, creepName) {
   Memory[unit].creep = creepName;
+  var room = Game.rooms[Memory[Memory[unit].buildQueue].room];
+  Memory[unit].paths.forEach(path => Room.deserializePath(path).forEach(
+    tile => room.createConstructionSite(tile.x, tile.y, STRUCTURE_ROAD)));
+  Memory[unit].pendingPush = 2;
 }
 
 module.exports.creepDied = function(unit, creepName) {
@@ -38,9 +42,9 @@ module.exports.creepDied = function(unit, creepName) {
 
 module.exports.run = function(unit) {
   var memory = Memory[unit];
-  if (memory.pendingPush) {
-    if (memory.firstRun) {
-      memory.firstRun = undefined;
+  if (memory.pendingPush != 0) {
+    if (memory.pendingPush == 2) {
+      memory.pendingPush = 1;
       return;
     }
     var buildQueue = Memory[memory.buildQueue];
@@ -48,7 +52,7 @@ module.exports.run = function(unit) {
     Game.rooms[buildQueue.room].find(FIND_CONSTRUCTION_SITES, {
       filter: site => site.structureType == STRUCTURE_ROAD,
     }).forEach(site => queue.push(site.id));
-    memory.pendingPush = undefined;
+    memory.pendingPush = 0;
   }
   var creep = memory.creep;
   if (creep !== null)
@@ -58,6 +62,8 @@ module.exports.run = function(unit) {
 module.exports.getNextTask = function(unit, creep) {
   if (creep.carry.energy != 0) {
     if (creep.memory.task == "repair")
+      return "build";
+    else if (creep.memory.task == "build")
       return "upgrade";
     else
       return "repair";
