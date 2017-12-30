@@ -27,6 +27,14 @@ module.exports.creepSpawning = function(unit, creepName) {
   var room = Game.rooms[Memory[Memory[unit].buildQueue].room];
   Memory[unit].paths.forEach(path => Room.deserializePath(path).forEach(
     tile => room.createConstructionSite(tile.x, tile.y, STRUCTURE_ROAD)));
+  room.find(FIND_STRUCTURES, {
+    filter: { structureType: STRUCTURE_EXTENSION},
+  }).forEach(function(target) {
+    room.createConstructionSite(target.pos.x + 1, target.pos.y, STRUCTURE_ROAD);
+    room.createConstructionSite(target.pos.x - 1, target.pos.y, STRUCTURE_ROAD);
+    room.createConstructionSite(target.pos.x, target.pos.y + 1, STRUCTURE_ROAD);
+    room.createConstructionSite(target.pos.x, target.pos.y - 1, STRUCTURE_ROAD);
+  });
   Memory[unit].pendingPush = 2;
 }
 
