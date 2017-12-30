@@ -16,8 +16,7 @@ var tryPlaceExtension = function(room, center, x, y) {
   y = center.y + y;
   if (y < buffer || y >= roomLimits - buffer)
     return;
-  if (room.lookForAtArea(
-        LOOK_SOURCES, y - 1, x - 1, y + 1, x + 1, true).length != 0)
+  if (room.getPositionAt(x, y).findInRange(FIND_SOURCES, 1).length != 0)
     return;
   if (room.createConstructionSite(x, y, STRUCTURE_EXTENSION) ==
       ERR_RCL_NOT_ENOUGH)
