@@ -2,6 +2,10 @@ module.exports.cleanup = function(memory) {
   memory.target = undefined;
 }
 
+module.exports.act = function(creep, target) {
+  return creep[this.action](target);
+}
+
 module.exports.run = function(creep) {
   if (this.stopCondition(creep)) {
     return true;
@@ -12,7 +16,7 @@ module.exports.run = function(creep) {
         return true;
       this.run(creep);
     }
-    if (creep[this.action](target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
+    if (this.act(creep, target) == ERR_NOT_IN_RANGE)
       creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
   }
 }
