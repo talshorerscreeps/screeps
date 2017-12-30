@@ -49,9 +49,12 @@ module.exports.run = function(unit) {
     }
     var buildQueue = Memory[memory.buildQueue];
     var queue = buildQueue.queue;
+    var theSpawn = Game.rooms[Memory[Memory[unit].buildQueue].room].find(
+      FIND_MY_SPAWNS)[0];
     Game.rooms[buildQueue.room].find(FIND_CONSTRUCTION_SITES, {
       filter: site => site.structureType == STRUCTURE_ROAD,
-    }).forEach(site => queue.push(site.id));
+    }).sort((a, b) => a.pos.getRangeTo(theSpawn) -
+      b.pos.getRangeTo(theSpawn)).forEach(site => queue.push(site.id));
     memory.pendingPush = 0;
   }
   var creep = memory.creep;
