@@ -1,29 +1,35 @@
 var ref = require("lib.ref");
 
+module.exports = _.clone(require("base.task.moveAct"));
+
+var resetCondition = target => target.energy == 0;
+
 module.exports.setup = function(creep) {
-  var sources = creep.room.find(FIND_SOURCES);
-  var best = sources[0].id;
-  for (idx in sources) {
-    var id = sources[idx].id;
+  var targets = creep.room.find(FIND_SOURCES, {
+    filter: target => !resetCondition(target),
+  });
+  if (targets.length == 0)
+    return true;
+  var best = targets[0].id;
+  for (idx in targets) {
+    var id = targets[idx].id;
     if (ref.count(id) < ref.count(best))
       best = id;
   }
-  creep.memory.source = best;
-  ref.get(creep.memory.source);
+  creep.memory.target = best;
+  ref.get(creep.memory.target);
 }
+
+var baseCleanup = module.exports.cleanup;
 
 module.exports.cleanup = function(memory) {
-  ref.put(memory.source);
-  memory.source = undefined;
+  ref.put(memory.target);
+  baseCleanup(memory);
 }
 
-module.exports.run = function(creep) {
-  var source = Game.getObjectById(creep.memory.source);
-  if (creep.carry.energy == creep.carryCapacity) {
-    return true;
-  } else if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
-    creep.moveTo(source, {
-      visualizePathStyle: {stroke: '#ffaa00'},
-    });
-  }
-}
+module.exports.resetCondition = resetCondition;
+
+module.exports.stopCondition = creep => (
+  creep.carry.energy == creep.carryCapacity);
+
+module.exports.action = "harvest";

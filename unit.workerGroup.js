@@ -34,12 +34,16 @@ module.exports.run = function(unit) {
 }
 
 module.exports.getNextTask = function(unit, creep) {
-  if (creep.carry.energy == 0)
-    return "harvest";
-  else if (creep.memory.task == "harvest")
+  if (creep.carry.energy == 0) {
+    if (creep.memory.task == "harvest")
+      return "idle";
+    else
+      return "harvest";
+  } else if (creep.memory.task == "harvest") {
     return "deposit";
-  else if (creep.memory.task == "deposit")
+  } else if (creep.memory.task == "deposit") {
     return "build";
-  else if (creep.memory.task == "build")
+  } else if (creep.memory.task == "build") {
     return "upgrade";
+  }
 }

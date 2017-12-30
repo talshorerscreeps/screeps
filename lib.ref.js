@@ -15,6 +15,8 @@ module.exports.get = function(id) {
 }
 
 module.exports.put = function(id) {
+  if (id === undefined)
+    return;
   if (Memory.refCount[id] == 1)
     Memory.refCount[id] = undefined;
   else

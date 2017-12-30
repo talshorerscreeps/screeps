@@ -12,6 +12,7 @@ module.exports.run = function(creep) {
   } else {
     var target = Game.getObjectById(creep.memory.target);
     if (this.resetCondition(target)) {
+      this.cleanup(creep.memory);
       if (this.setup(creep))
         return true;
       this.run(creep);
